@@ -82,9 +82,30 @@ WHERE ID IN (
 );
 ```
 
-## Step 4: Purge Trashed Records via WP-CLI
-After verifying the catalog, permanently purge trashed products and associated `wp_postmeta` rows via CLI to avoid web/database lock timeouts:
+## Step 4: Purge Trashed Records via WP-CLI (SSH Terminal)
+> **Note:** Run this command in your server's **SSH terminal** inside `/var/www/html`—**not** in phpMyAdmin.
+
+After verifying the catalog, permanently purge trashed products and associated `wp_postmeta` rows via WP-CLI to avoid web/database lock timeouts:
 
 ```bash
+cd /var/www/html
 wp post delete $(wp post list --post_type='product' --post_status='trash' --format=ids) --force
+```
+
+### Alternative: Purge Trashed Records via phpMyAdmin (SQL)
+If SSH/WP-CLI is unavailable, run these SQL statements in **phpMyAdmin** to purge trashed products and their orphaned metadata:
+
+```sql
+DELETE pm FROM wp_postmeta pm
+JOIN wp_posts p ON pm.post_id = p.ID
+WHERE p.post_type = 'product' AND p.post_status = 'trash';
+
+DELETE tr FROM wp_term_relationships tr
+JOIN wp_posts p ON tr.object_id = p.ID
+WHERE p.post_type = 'product' AND p.post_status = 'trash';
+
+DELETE FROM wp_posts
+WHERE post_type = 'product' AND post_status = 'trash';
+```
+
 ```
