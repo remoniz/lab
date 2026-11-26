@@ -108,4 +108,3 @@ DELETE FROM wp_posts
 WHERE post_type = 'product' AND post_status = 'trash';
 ```
 
-```
